@@ -1,0 +1,55 @@
+from flask import Flask, jsonify, request
+
+app = Flask(__name__)
+
+# Sample data
+repositories = [
+    {"id": 1, "name": "repo1", "description": "First repository"},
+    {"id": 2, "name": "repo2", "description": "Second repository"}
+]
+
+# Endpoint to retrieve all repositories
+@app.route('/repositories', methods=['GET'])
+def get_repositories():
+    return jsonify(repositories)
+
+# Endpoint to retrieve a specific repository
+@app.route('/repositories/<int:repo_id>', methods=['GET'])
+def get_repository(repo_id):
+    for repo in repositories:
+        if repo['id'] == repo_id:
+            return jsonify(repo)
+    return jsonify({'error': 'Repository not found'})
+
+# Endpoint to create a new repository
+@app.route('/repositories', methods=['POST'])
+def create_repository():
+    new_repo = {
+        'id': len(repositories) + 1,
+        'name': request.json['name'],
+        'description': request.json['description']
+    }
+    repositories.append(new_repo)
+    return jsonify(new_repo), 201
+
+# Endpoint to update an existing repository
+@app.route('/repositories/<int:repo_id>', methods=['PUT'])
+def update_repository(repo_id):
+    for repo in repositories:
+        if repo['id'] == repo_id:
+            repo['name'] = request.json['name']
+            repo['description'] = request.json['description']
+            return jsonify(repo)
+    return jsonify({'error': 'Repository not found'})
+
+# Endpoint to delete a repository
+@app.route('/repositories/<int:repo_id>', methods=['DELETE'])
+def delete_repository(repo_id):
+    for repo in repositories:
+        if repo['id'] == repo_id:
+            repositories.remove(repo)
+            return jsonify({'message': 'Repository deleted'})
+    return jsonify({'error': 'Repository not found'})
+
+if __name__ == '__main__':
+    app.run()
